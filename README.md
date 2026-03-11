@@ -28,7 +28,7 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/your-username/Stock-predict-toy.git
+git clone https://github.com/Morse-Moss/Stock-predict-toy.git
 cd Stock-predict-toy
 ```
 
