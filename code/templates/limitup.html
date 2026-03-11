@@ -1,0 +1,204 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+<script src="../static/js/echarts.js" charset='utf-8'></script>
+<script src="../static/js/bootstrap-datepicker.min.js" charset='utf-8'></script>
+<script src="../static/js/bootstrap-datepicker.zh-CN.min.js" charset='utf-8'></script>
+<link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css" />
+
+<script type="text/javascript">
+    // 初始化界面
+    $(function () {
+        $('#li_1').attr('class', 'nav-item');
+        $('#li_2').attr('class', 'nav-item');
+        $('#li_3').attr('class', 'nav-item');
+        $('#li_4').attr('class', 'nav-item active');
+        $('#li_5').attr('class', 'nav-item');
+        $('#li_6').attr('class', 'nav-item');
+        $('#li_7').attr('class', 'nav-item');
+        $('#li_8').attr('class', 'nav-item');
+        $('#li_9').attr('class', 'nav-item');
+        $('#li_10').attr('class', 'nav-item');
+
+        $('#module_name').text($('.nav-item.active').text())
+
+        $("#trade_date").datepicker({
+            language: 'zh-CN', //语言
+            autoclose: true, //选择后自动关闭
+            clearBtn: true,//清除按钮
+            format: "yyyy-mm-dd"//日期格式
+        });
+
+        $("#search_btn").click(function () {
+            $("#table-body").empty();
+
+            $("#main5").html("");
+            const trade_date = $("#trade_date").val();
+            $.get('/api/limitup_analysis/' + trade_date, {},
+                function (data) {
+                    $("#table-body").append(data['tbody']);
+
+                    var dom = document.getElementById("main1");
+                    var myChart = echarts.init(dom);
+
+                    var option = {
+                        title: {
+                            left: 'center',
+                            text: '不同行业板块的涨停股票数量分布直方图',
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{b} : {c}'
+                        },
+                        xAxis: {
+                            name: '行业板块',
+                            type: 'category',
+                            data: data['concept'],
+                            axisLabel: {
+                                // 旋转角度，解决标签重叠问题
+                                rotate: 45
+                            }
+                        },
+                        yAxis: {
+                            name: '涨停股票数',
+                            type: 'value'
+                        },
+                        series: [
+                            {
+                                data: data['limit_up_count'],
+                                type: 'line'
+                            },
+                            {
+                                type: 'bar',
+                                itemStyle: {
+                                    color: '#19CAAD'
+                                },
+                                data: data['limit_up_count']
+                            }
+                        ]
+                    };
+
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+                    var dom = document.getElementById("main2");
+                    var myChart = echarts.init(dom);
+
+                    var pie_data = []
+                    for (var i = 0; i < data['concept_moneys'].length; i++) {
+                        pie_data.push({ value: (data['concept_moneys'][i] / 100000000).toFixed(2), name: data['concept'][i] })
+                    }
+                    var option = {
+                        title: {
+                            left: 'center',
+                            text: '不同行业板块的成交额占比分布',
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{b}: {c}亿 ({d}%)'
+                        },
+                        grid: {
+                            left: '8%',
+                            right: '1%',
+                            bottom: '50%',
+                            containLabel: true
+                        },
+                        legend: {
+                            type: 'scroll',
+                            orient: 'vertical',
+                            left: 0,
+                            right: 10,
+                            top: 20,
+                            data: data.legendData
+                        },
+                        series: [
+                            {
+                                type: 'pie',
+                                radius: '55%',
+                                // center: ['60%', '40%'],
+                                itemStyle: {
+                                    borderRadius: 10,
+                                    borderColor: '#fff',
+                                    borderWidth: 2
+                                },
+                                label: {
+                                    show: true
+                                },
+                                emphasis: {
+                                    label: {
+                                        show: true,
+                                        fontSize: '40',
+                                        fontWeight: 'bold'
+                                    }
+                                },
+                                labelLine: {
+                                    show: true
+                                },
+                                data: pie_data
+                            }
+                        ]
+                    };
+
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+                }
+            );
+
+        });
+
+    });
+
+</script>
+
+<div class="container">
+
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-6 ms-auto me-auto">
+            <div class="input-group mb-3">
+                <input type="text" id="trade_date" class="form-control" placeholder="请选择交易日期">
+                <button class="btn btn-success" type="button" id="search_btn">涨停热点分析</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" style="margin-top: 10px;">
+    <h3 class="page-header" style="margin-top: 20px;">热点行业板块涨停板数量分布</h3>
+    <div class="row placeholders" style="margin-bottom: -10px;">
+        <div class="col-6" style="height:500px;" id="main1">
+        </div>
+        <div class="col-6" style="height:500px;" id="main2">
+        </div>
+    </div>
+
+    <h3 class="page-header" style="margin-top: 20px;">当日涨停股票池</h3>
+    <div class="col-xs-12" style="margin-top: 10px;">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">证券代码</th>
+                    <th scope="col">证券名称</th>
+                    <th scope="col">涨跌幅</th>
+                    <th scope="col">最新价</th>
+                    <th scope="col">成交额/亿</th>
+                    <th scope="col">流通市值/亿</th>
+                    <th scope="col">换手率</th>
+                    <th scope="col">封板资金/亿</th>
+                    <th scope="col">炸板次数</th>
+                    <th scope="col">涨停统计</th>
+                    <th scope="col">行业板块</th>
+                    <th scope="col">交易日期</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,334 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+<script src="../static/js/echarts.js" charset='utf-8'></script>
+
+<script type="text/javascript">
+    // 初始化界面
+    $(function () {
+        $('#li_1').attr('class', 'nav-item');
+        $('#li_2').attr('class', 'nav-item');
+        $('#li_3').attr('class', 'nav-item active');
+        $('#li_4').attr('class', 'nav-item');
+        $('#li_5').attr('class', 'nav-item');
+        $('#li_6').attr('class', 'nav-item');
+        $('#li_7').attr('class', 'nav-item');
+        $('#li_8').attr('class', 'nav-item');
+        $('#li_9').attr('class', 'nav-item');
+        $('#li_10').attr('class', 'nav-item');
+
+        $('#module_name').text($('.nav-item.active').text())
+
+        $("#search_btn").click(function () {
+            $("#add_select").empty();
+            $("#gsjj").empty();
+            $("#concept_boards").empty();
+            $("#main4").html("");
+            $("#main5").html("");
+            const search_input = $("#search_input").val();
+            $.get('/api/search_stock_index/' + search_input, {},
+                function (data) {
+                    var kline_data = data['klines']
+                    splitData(kline_data);
+
+                    function splitData(rawData) {
+                        var categoryData = [];
+                        var values = []
+                        for (var i = 0; i < rawData.length; i++) {
+                            categoryData.push(rawData[i].splice(0, 1)[0]);
+                            values.push(rawData[i])
+                        }
+                        return {
+                            categoryData: categoryData,
+                            values: values
+                        };
+                    }
+
+                    var chartDom = document.getElementById('main1');
+                    var myChart = echarts.init(chartDom);
+
+                    var upColor = '#ec0000';//红涨
+                    var downColor = '#00da3c';//绿跌
+                    var dataTime = data['dates'];//时间
+                    var dataMes = data['klines']; // k线数据
+                    var volumeNum = data['volumes'];//交易量
+                    var volumeData = []//交易量添加颜色判断
+                    for (var i = 0; i < dataMes.length; i++) {
+                        volumeData.push([dataTime[i], volumeNum[i], dataMes[i][0] > dataMes[i][1] ? 1 : -1]);
+                        //第一个代表时间，第二个代表成交量的值，第三个判断颜色1为绿色-1为红色
+                    }
+                    var option = {
+                        title: {
+                            text: data['name'] + '的 K 线历史走势'
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'cross',
+                                link: { xAxisIndex: 'all' },//上下划过分开展示还是一起展示
+                            },
+                            formatter: function (params) {//修改鼠标划过显示为中文
+
+                                if (params[0].componentSubType == "candlestick") {//先划过蜡烛图
+                                    var params1 = params[0];//开盘收盘最低最高数据汇总
+                                    var params2 = params[1].data[1];//成交量数据
+
+                                } else if (params[0].componentSubType == "bar") {//先划过成交量
+                                    var params1 = params[1];//开盘收盘最低最高数据汇总
+                                    var params2 = params[0].data[1] / 100000000;//成交量数据
+
+                                }
+                                var currentItemData = params1.data;//k线数据
+                                return params1.name + '<br>' +
+                                    '开盘价:' + currentItemData[1] + '<br>' +
+                                    '收盘价:' + currentItemData[2] + '<br>' +
+                                    '最低价:' + currentItemData[3] + '<br>' +
+                                    '最高价:' + currentItemData[4] + '<br>' +
+                                    '成交量:' + params2
+                            }
+                        },
+
+                        axisPointer: {
+                            link: { xAxisIndex: 'all' },//整体划过还是单个划过
+                        },
+                        toolbox: {
+                            feature: {
+                                dataZoom: {
+                                    yAxisIndex: false
+                                }
+                            }
+                        },
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                xAxisIndex: [0, 1],
+                                start: 10,
+                                end: 100
+                            },
+                            {
+                                show: true,
+                                xAxisIndex: [0, 1],
+                                type: 'slider',
+                                bottom: 10,
+                                start: 10,
+                                end: 100
+                            }
+                        ],
+                        visualMap: {//视觉映射组，就是将数据映射到视觉元素
+                            show: false,
+                            seriesIndex: 1,//指定取哪个系列的数据，第几个图形的数据，从0开始，1代表的是成交量的柱状图
+                            pieces: [{//自定义『分段式视觉映射组件』的每一段的范围，以及每一段的文字，以及每一段的特别的样式
+                                value: 1,//value值为1则用downColor颜色的样式
+                                color: downColor
+                            }, {
+                                value: -1,
+                                color: upColor
+                            }]
+                        },
+                        grid: [
+                            {//蜡烛图的位置
+                                left: '5%',
+                                right: '5%',
+                                height: '58%'
+                            },
+                            {//成交量柱状图的位置
+                                show: true,
+                                left: '5%',
+                                right: '5%',
+                                top: '79%',
+                                height: '12%'
+                            }
+                        ],
+                        xAxis: [
+                            {//蜡烛图的设置
+                                type: 'category',
+                                data: dataTime,
+                                scale: true,
+                                axisLine: { onZero: false },
+                                splitLine: { show: false },
+                                splitNumber: 20,
+                                min: 'dataMin',
+                                max: 'dataMax',
+                                axisPointer: {
+                                    z: 100
+                                },
+
+                            },
+                            {//成交量柱状图的设置
+                                type: 'category',
+                                gridIndex: 1,
+                                data: dataTime,
+                                scale: true,
+                                axisLine: { onZero: false },
+                                axisTick: { show: false },
+                                splitLine: { show: false },
+                                axisLabel: { show: false },
+                                min: 'dataMin',
+                                max: 'dataMax'
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                name: '股价',
+                                scale: true,
+                                splitArea: {
+                                    show: true
+                                }
+                            },
+                            {
+                                name: '成交量',
+                                scale: true,
+                                gridIndex: 1,
+                                splitNumber: 2,
+                                axisLabel: { show: false },
+                                axisLine: { show: false },
+                                axisTick: { show: false },
+                                splitLine: { show: false }
+                            }
+                        ],
+                        legend: {
+                            data: ['日K', 'MA10', 'MA20', 'MA60'],
+                            show: true,
+                            top: "6%"
+                        },
+                        series: [
+                            {//蜡烛图的设置
+                                name: '日K',
+                                type: 'candlestick',
+                                data: dataMes,
+                                itemStyle: {
+                                    color: upColor,
+                                    color0: downColor,
+                                    borderColor: null,
+                                    borderColor0: null
+                                },
+                            },
+                            {//成交量柱状图的设置
+                                name: '成交量',
+                                type: 'bar',
+                                xAxisIndex: 1,
+                                yAxisIndex: 1,
+                                data: volumeData
+                            },
+                            {
+                                name: 'MA10',
+                                type: 'line',
+                                data: data['tech_datas']['MA10'],
+                                xAxisIndex: 0,
+                                yAxisIndex: 0,
+                                symbol: 'none',  //取消折点圆圈
+                                smooth: true,
+                                lineStyle: {
+                                    opacity: 0.7
+                                }
+                            },
+                            {
+                                name: 'MA20',
+                                type: 'line',
+                                data: data['tech_datas']['MA20'],
+                                xAxisIndex: 0,
+                                yAxisIndex: 0,
+                                symbol: 'none',  //取消折点圆圈
+                                smooth: true,
+                                lineStyle: {
+                                    opacity: 0.7
+                                }
+                            },
+                            {
+                                name: 'MA60',
+                                type: 'line',
+                                data: data['tech_datas']['MA60'],
+                                xAxisIndex: 0,
+                                yAxisIndex: 0,
+                                symbol: 'none',  //取消折点圆圈
+                                smooth: true,
+                                lineStyle: {
+                                    opacity: 0.7
+                                }
+                            },
+                        ]
+                    };
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+                }
+            );
+
+            $.get('/api/query_jibenmian_info/' + search_input, {},
+                function (data) {
+                    // 主要技术指标
+                    var zyzb_table = data['zyzb_table']
+                    $('#main4').append('<h3>主要财务指标</h3><hr/>')
+                    $('#main4').append(zyzb_table)
+
+                    $('#main5').append('<h3>机构预测</h3><hr/>')
+                    var jgyc_table = data['jgyc_table']
+                    $('#main5').append(jgyc_table)
+
+                    $('#gsjj').append('<h3>' + data['gsmc'] + '</h3>')
+                    $('#gsjj').append('<p>' + data['gsjj'] + '</p>')
+
+                    // 所属概念板块
+                    $('#concept_boards').append(data['concept_boards'])
+                }
+            );
+
+        });
+
+        // 如果链接带有股票代码或股票名称
+        const search = new URLSearchParams(window.location.search);
+        // 模拟点击
+        $('#search_input').val(search.get('search'));
+        $("#search_btn").click();
+    });
+
+    function button_click_search(stock_code) {
+        $('#search_input').val(stock_code);
+        $("#search_btn").click();
+    }
+
+</script>
+
+<div class="container">
+
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-6 ms-auto me-auto">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="search_input" placeholder="请输入股票名称、代码"
+                    aria-describedby="button-addon2">
+                <button class="btn btn-success" type="button" id="search_btn">搜索</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" style="margin-top: 10px;">
+    <div class="col-xs-12">
+        <div class="row" style="margin-top: 40px;">
+            <div class="col-12" style="height:530px;" id="main1"></div>
+        </div>
+
+        <div class="row placeholders" style="margin-top: 20px; margin-left: 20px; margin-right: 20px;" id="gsjj">
+        </div>
+
+
+    </div>
+    <div style="margin-left: 20px; margin-right: 10px; margin-bottom: 10px;">
+        <div class="row placeholders" style="margin-top: 0px;">
+            <div class="col-12" id="main4"></div>
+        </div>
+        <div class="col-12" id="main5" style="margin-top: 10px;"></div>
+    </div>
+
+    <!--所属概念板块-->
+    <div style="margin-left: 20px; margin-right: 10px; margin-bottom: 10px;">
+        <div class="col-md-12" id="concept_boards" style="font-size: 16px;">
+
+        </div>
+    </div>
+
+</div>
+</div>
+
+{% endblock %}

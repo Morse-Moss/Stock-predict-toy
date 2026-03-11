@@ -1,0 +1,53 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+<script src="../static/js/echarts.js" charset='utf-8'></script>
+
+<script type="text/javascript">
+    // 初始化界面
+    $(function () {
+        $('#li_1').attr('class', 'nav-item');
+        $('#li_2').attr('class', 'nav-item');
+        $('#li_3').attr('class', 'nav-item');
+        $('#li_4').attr('class', 'nav-item');
+        $('#li_5').attr('class', 'nav-item');
+        $('#li_6').attr('class', 'nav-item');
+        $('#li_7').attr('class', 'nav-item active');
+        $('#li_8').attr('class', 'nav-item');
+        $('#li_9').attr('class', 'nav-item');
+        $('#li_10').attr('class', 'nav-item');
+
+        $('#module_name').text($('.nav-item.active').text())
+
+        $.get('/api/stock_rank', {},
+            function (data) {
+                $('#tbody').append(data)
+            }
+        );
+    });
+</script>
+
+<div class="" style="margin-top: 10px;">
+    <h3 class="page-header">最新资金热点方向</h3>
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>今日涨跌%</th>
+                    <th>股票代码</th>
+                    <th>股票名称</th>
+                    <th>所属版块</th>
+                    <th>5日涨跌%</th>
+                    <th>5日主力净占比</th>
+                    <th>10日主力净占比</th>
+                    <th>今日主力净占比</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

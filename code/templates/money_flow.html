@@ -1,0 +1,183 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+<script src="../static/js/echarts.js" charset='utf-8'></script>
+
+<script type="text/javascript">
+    // 初始化界面
+    $(function () {
+        $('#li_1').attr('class', 'nav-item');
+        $('#li_2').attr('class', 'nav-item');
+        $('#li_3').attr('class', 'nav-item');
+        $('#li_4').attr('class', 'nav-item');
+        $('#li_5').attr('class', 'nav-item active');
+        $('#li_6').attr('class', 'nav-item');
+        $('#li_7').attr('class', 'nav-item');
+        $('#li_8').attr('class', 'nav-item');
+        $('#li_9').attr('class', 'nav-item');
+        $('#li_10').attr('class', 'nav-item');
+
+        $('#module_name').text($('.nav-item.active').text())
+
+        $.get('/api/money_flow_analysis', {},
+            function (data) {
+                var dom = document.getElementById("main1");
+                var myChart = echarts.init(dom);
+
+                var option = {
+                    title: {
+                        left: 'center',
+                        text: '沪深两市的主力、超大单、大单、中单和小单的实时资金流分布',
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (params) {
+                            // params 是一个数组，包含当前 tooltip 触发轴上的所有数据项的信息
+                            var result = '<b style="color: #efe009">实时资金流</b><br/>'; // 结果字符串
+                            for (var i = 0; i < params.length; i++) {
+                                var param = params[i];
+                                // 每个数据项都包含 name（系列名），value（数值）等信息
+                                result += param.name + ' : ' + param.value + ' 亿'; // 添加单位
+                                if (i !== params.length - 1) {
+                                    result += '<br/>';
+                                }
+                            }
+                            return result;
+                        }
+                    },
+                    legend: {
+                        top: "6%",
+                        data: ['主力净流入', '超大单净流入', '大单净流入', '中单净流入', '小单净流入']
+                    },
+                    xAxis: {
+                        name: '时间',
+                        type: 'category',
+                        data: data['时间'],
+                    },
+                    yAxis: {
+                        name: '资金',
+                        type: 'value'
+                    },
+                    grid: {
+                        left: '5%',
+                        right: '5%',
+                        bottom: '5%',
+                    },
+                    series: [
+                        {
+                            name: '主力净流入',
+                            data: data['主力净流入'],
+                            type: 'line'
+                        },
+                        {
+                            name: '小单净流入',
+                            data: data['小单净流入'],
+                            type: 'line'
+                        },
+                        {
+                            name: '中单净流入',
+                            data: data['中单净流入'],
+                            type: 'line'
+                        },
+                        {
+                            name: '大单净流入',
+                            data: data['大单净流入'],
+                            type: 'line'
+                        },
+                        {
+                            name: '超大单净流入',
+                            data: data['超大单净流入'],
+                            type: 'line'
+                        }
+                    ]
+                };
+
+                if (option && typeof option === "object") {
+                    myChart.setOption(option, true);
+                }
+
+                
+                var dom = document.getElementById("main2");
+                var myChart = echarts.init(dom);
+
+                var option = {
+                    title: {
+                        left: 'center',
+                        text: '南向资金包括港股通(沪)、港股通(深)的实时净买额分布',
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (params) {
+                            // params 是一个数组，包含当前 tooltip 触发轴上的所有数据项的信息
+                            var result = '<b style="color: #efe009">实时资金流</b><br/>'; // 结果字符串
+                            for (var i = 0; i < params.length; i++) {
+                                var param = params[i];
+                                // 每个数据项都包含 name（系列名），value（数值）等信息
+                                result += param.name + ' : ' + param.value + ' 亿'; // 添加单位
+                                if (i !== params.length - 1) {
+                                    result += '<br/>';
+                                }
+                            }
+                            return result;
+                        }
+                    },
+                    legend: {
+                        top: "6%",
+                        data: ['港股通(沪)净买额', '港股通(深)净买额', '南向资金净买额']
+                    },
+                    xAxis: {
+                        name: '时间',
+                        type: 'category',
+                        data: data['南向_时间'],
+                    },
+                    yAxis: {
+                        name: '资金',
+                        type: 'value'
+                    },
+                    grid: {
+                        left: '5%',
+                        right: '5%',
+                        bottom: '5%',
+                    },
+                    series: [
+                        {
+                            name: '港股通(沪)净买额',
+                            data: data['港股通(沪)净买额'],
+                            type: 'line'
+                        },
+                        {
+                            name: '港股通(深)净买额',
+                            data: data['港股通(深)净买额'],
+                            type: 'line'
+                        },
+                        {
+                            name: '南向资金净买额',
+                            data: data['南向资金净买额'],
+                            type: 'line'
+                        }
+                    ]
+                };
+
+                if (option && typeof option === "object") {
+                    myChart.setOption(option, true);
+                }
+            }
+        );
+    });
+</script>
+
+<div class="row" style="margin-top: 10px;">
+    <h3 class="page-header" style="margin-top: 20px;">沪深两市实时资金流</h3>
+    <div class="row placeholders">
+        <div class="col-12" style="height:500px;" id="main1">
+        </div>
+    </div>
+
+    <h3 class="page-header" style="margin-top: 20px;">南向实时资金流</h3>
+    <div class="row placeholders">
+        <div class="col-12" style="height:500px;" id="main2">
+        </div>
+    </div>
+</div>
+
+{% endblock %}

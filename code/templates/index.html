@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script type="text/javascript">
+    // 初始化界面
+    $(function () {
+        $('#li_1').attr('class', 'nav-item active');
+        $('#li_2').attr('class', 'nav-item');
+        $('#li_3').attr('class', 'nav-item');
+        $('#li_4').attr('class', 'nav-item');
+        
+        $('#module_name').text($('.nav-item.active').text())    
+
+    });
+</script>
+
+<style>
+    .icon-box {
+        margin-top: 80px;
+        padding: 50px 30px;
+        position: relative;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 0 29px 0 rgb(18 66 101 / 8%);
+        transition: all 0.3s ease-in-out;
+        border-radius: 8px;
+        z-index: 1;
+    }
+
+    *, ::after, ::before {
+        box-sizing: border-box;
+    }
+</style>
+<div class="container" style="padding-top: 10px;">
+    <div class="row">
+        <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 d-flex flex-column justify-content-center">
+            <h1>基于模式识别的股票预测系统</h1>
+            <h4 style="line-height: 1.5">系统利用网络爬虫从东方财富采集盘大盘指数、资金流向、个股K线、财务指标等海量的股票数据，
+                从基本面、技术面、政策面等角度进行分析，挖掘市场行情热度与热点板块，并对个股进行多维度诊断分析。同时基于模式识别对股票趋势进行建模，预测未来走势。该系统可以更加科学地进行股票投资决策，提高投资回报率。</h4>
+        </div>
+        <div class="col-lg-6 order-1 order-lg-2 hero-img">
+            <img src="/static/img/hero-img.png" style="max-width: 100%;height: auto;vertical-align: middle;">
+        </div>
+    </div>
+
+    <div class="row icon-boxes">
+        <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
+            <div class="icon-box">
+                <h4 class="title"><a href="">股票数据采集</a></h4>
+                <p class="description">利用 requests 模拟请求东方财富等财经网站，抓取大盘、个股、财务等数据，并进行清洗和格式化。</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
+            <div class="icon-box">
+                <h4 class="title"><a href="">大盘与板块分析</a></h4>
+                <p class="description">从大盘指数、涨停板热度、资金流向、市场估值和估值等角度，挖掘当前市场的行情热度与板块分布。</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
+            <div class="icon-box">
+                <h4 class="title"><a href="">个股诊断分析</a></h4>
+                <p class="description">支持股票模糊搜索、代码搜索，计算各项指标，从技术面、基本面对股票进行诊断，并进行股票的对比分析。</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
+            <div class="icon-box">
+                <h4 class="title"><a href="">可视化交互分析平台</a></h4>
+                <p class="description">利用Flask + Echarts 搭建可视化交互分析平台，通过该系统，用户可以更加科学地进行股票投资决策，提高投资回报率。</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

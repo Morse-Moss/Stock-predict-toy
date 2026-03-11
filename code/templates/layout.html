@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>股票数据分析与预测</title>
+
+  <!-- Fonts and icons -->
+  <script src="../static/js/plugin/webfont/webfont.min.js"></script>
+  <script>
+    WebFont.load({
+      google: { families: ["Public Sans:300,400,500,600,700"] },
+      custom: {
+        families: [
+          "Font Awesome 5 Solid",
+          "Font Awesome 5 Regular",
+          "Font Awesome 5 Brands",
+          "simple-line-icons",
+        ],
+        urls: ["../static/css/fonts.min.css"],
+      },
+      active: function () {
+        sessionStorage.fonts = true;
+      },
+    });
+  </script>
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="../static/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../static/css/plugins.min.css" />
+  <link rel="stylesheet" href="../static/css/kaiadmin.min.css" />
+  <!--   Core JS Files   -->
+  <script src="../static/js/core/jquery-3.7.1.min.js"></script>
+  <script src="../static/js/core/popper.min.js"></script>
+  <script src="../static/js/core/bootstrap.min.js"></script>
+  <script src="../static/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+  <script src="../static/js/plugin/chart.js/chart.min.js"></script>
+  <script src="../static/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+  <script src="../static/js/plugin/chart-circle/circles.min.js"></script>
+  <script src="../static/js/plugin/datatables/datatables.min.js"></script>
+  <script src="../static/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+  <script src="../static/js/plugin/jsvectormap/jsvectormap.min.js"></script>
+  <script src="../static/js/plugin/jsvectormap/world.js"></script>
+  <script src="../static/js/plugin/sweetalert/sweetalert.min.js"></script>
+  <script src="../static/js/kaiadmin.min.js"></script>
+
+  <script type="text/javascript">
+    // 初始化界面
+    $(function () {
+      
+      // 判断是否登录
+      $.get('http://127.0.0.1:5000/user/check_login', {},
+        function (data) {
+          if (data['login'] === true) {
+            $('#username').text(data["username"]);
+          } else {
+            window.location.href = '/login'
+          }
+        }
+      );
+
+      // 退出登录
+      $("#logout").click(function () {
+        $.get('/user/logout', {},
+          function (data) {
+            alert(data['info']);
+            if (data['success'] === true) {
+              window.location.href = '/login'
+            }
+          }
+        );
+      });
+       
+    });
+  </script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark">
+          <a href="/" class="logo">
+            <img src="../static/img/favicon.png" alt="navbar brand" class="navbar-brand" height="20" />
+            <span style="color: white; padding-left: 5px;">股票数据分析与预测</span>
+          </a>
+          <div class="nav-toggle">
+            <button class="btn btn-toggle toggle-sidebar">
+              <i class="gg-menu-right"></i>
+            </button>
+            <button class="btn btn-toggle sidenav-toggler">
+              <i class="gg-menu-left"></i>
+            </button>
+          </div>
+          <button class="topbar-toggler more">
+            <i class="gg-more-vertical-alt"></i>
+          </button>
+        </div>
+        <!-- End Logo Header -->
+      </div>
+      <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+          <ul class="nav nav-secondary">
+            <li class="nav-item" id="li_1">
+              <a href="/"><i class="fas fa-home"></i>
+                <p>首页</p>
+              </a>
+            </li>
+
+            <li class="nav-item" id="li_2">
+              <a href="/dapan"><i class="fas fa-box-open"></i>
+                <p>大盘指数行情</p>
+              </a>
+            </li>
+
+            <li class="nav-item" id="li_3">
+              <a href="/stock_info"><i class="fas fa-box-open"></i>
+                <p>个股量化分析</p>
+              </a>
+            </li>
+
+            
+            <li class="nav-item" id="li_4">
+              <a href="/limitup"><i class="fas fa-box-open"></i>
+                <p>涨停板热点分析</p>
+              </a>
+            </li>
+            
+            <li class="nav-item" id="li_5">
+              <a href="/money_flow"><i class="fas fa-box-open"></i>
+                <p>大盘资金流向</p>
+              </a>
+            </li>
+            <li class="nav-item" id="li_6">
+              <a href="/market_eval"><i class="fas fa-box-open"></i>
+                <p>市场基本面估值分析</p>
+              </a>
+            </li>
+
+            <li class="nav-item" id="li_7">
+              <a href="/lhb_rank"><i class="fas fa-box-open"></i>
+                <p>龙虎榜热股排名</p>
+              </a>
+            </li>
+
+            <li class="nav-item" id="li_8">
+              <a href="/stock_quant"><i class="fas fa-box-open"></i>
+                <p>个股收益量化分析</p>
+              </a>
+            </li>
+
+            <li class="nav-item" id="li_9">
+              <a href="/stock_predict"><i class="fas fa-box-open"></i>
+                <p>股票趋势预测</p>
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="main-panel">
+      <div class="main-header">
+
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+          <div class="container-fluid">
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+              <h3 id="module_name"></h3>
+            </nav>
+
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+              <li class="nav-item topbar-user dropdown hidden-caret">
+                <span>
+                  <span class="profile-username">
+                    <span class="op-7">Hi,</span>
+                    <span class="fw-bold" id="username"></span>
+                  </span>
+                </span>
+
+                <span></span>
+                <span class="profile">
+                  <button class="btn" id="logout">退出</span>
+                </span>
+                </span>
+
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div class="container">
+        <div class="page-inner">
+          {% block content %}
+          {% endblock %}
+        </div>
+      </div>
+
+{#      <footer class="footer">#}
+{#        <div class="container-fluid d-flex justify-content-between">#}
+{##}
+{#          <div class="copyright">#}
+{#            2024, made with <i class="fa fa-heart heart text-danger"></i> by#}
+{#            <a href="#">Username</a>#}
+{#          </div>#}
+{#        </div>#}
+{#      </footer>#}
+    </div>
+
+  </div>
+
+</body>
+
+</html>
